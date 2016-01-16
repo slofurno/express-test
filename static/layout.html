@@ -38,7 +38,6 @@ input {
   <body ng-app="app">
 
 	<script>
-/*
 	function mapQueryString(s){
 		  return s.split('&')
 	  .map(function(kvp){
@@ -52,7 +51,6 @@ input {
 	}
 
 	var qs = mapQueryString(location.search.substr(1));
-*/
 	/*
 	var options = {
 		method,
@@ -61,7 +59,7 @@ input {
 		headers
 	};
 	*/
-/*
+
 	function request (options)
 	{ 
 		var loggedin = localStorage.getItem("account");
@@ -91,25 +89,20 @@ input {
 			client.send (body);
 		});
 	}
-*/
+
 
 	</script>
 
-	<div ng-controller="menuController" style="position:absolute; top:0; width:100%; height:48px; padding:13px 0; background-color:gainsboro;">
+	<div style="position:absolute; top:0; width:100%; height:48px; padding:13px 0; background-color:gainsboro;">
 	  <a class="item" ui-sref="home">
 		Home
 	  </a>
-	  <a class="item" ng-if="!account.token" ui-sref="login">
+	  <a class="item" ui-sref="login">
 		Login
 	  </a>
-	  <div class="item" ng-if="account.token">
-		hi, {{account.email}}	
-	  </div>
 	  <a class="item" ui-sref="ads">
 		Ads	
 	  </a>
-	  <a class="item" ng-click="logout()" ng-if="account.token" href="#"> logout
-	</a>
 	</div>
 	<div ui-view style="max-width:800px; margin:0 auto; padding: 40px 0 0 0;">
 

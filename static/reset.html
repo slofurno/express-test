@@ -1,0 +1,35 @@
+<div style="width:360px; 
+        margin:0 auto; 
+        padding: 20px;
+        background-color:gainsboro">
+
+    <input id="password" type="text" name="password" placeholder="password"/>
+    <input id="submit" type="button" value="submit"/>
+
+</div>
+<script>
+document.getElementById("submit").onclick = function(e) {
+var password = document.getElementById("password").value;	
+var expire = parseInt(qs.expire);
+
+var body = {
+    email:qs.email,
+    expire:expire,
+    hash:qs.hash,
+    password:password
+};
+
+request({method:"POST", url:"/account/reset", body:JSON.stringify(body)})
+    .then(x => {
+        console.log("SUCCESS password reset");
+        location.assign("/login");    
+    })
+    .catch(err => {
+        console.error(err);    
+    });
+
+};
+
+</script>
+</body>
+</html>

@@ -1,84 +1,49 @@
-var m = require('mithril');
-var request = require('superagent');
+var angular = require('angular');
+var uiRouter = require('angular-ui-router');
+var loginController = require("./loginController");
+var accountService = require("./accountService");
+var httpService = require("./httpService");
+var adsController = require('./adsController');
 
-var home = {
-    controller: function() {
-        return {greeting: "Hello"}
-    },
-    view: function(ctrl) {
-        return m("h1", ctrl.greeting)
-    }
-};
+var app = angular.module('app', [uiRouter]);
 
+app.factory("httpService", httpService);
+app.factory("accountService", ["httpService", accountService]);
 
-var login = {
-    controller: function() {
-        return {greeting: "login"}
-    },
-    view: function(ctrl) {
-        return m("h1", ctrl.greeting)
-    }
-};
+app.controller("loginController", ["$scope", "accountService", loginController]);
 
-var sponser = {
-    controller: function() {
-        return {greeting: "ponser"}
-    },
-    view: function(ctrl) {
-        return m("h1", ctrl.greeting)
-    }
-};
+app.controller("adsController", ["$scope", "accountService", adsController]);
 
+app.controller("menuController", ["$scope", "accountService", function($scope, accountService) {
+	$scope.account = accountService.account;	
 
-var user = {
-    controller: function() {
-        return {greeting: "user"}
-    },
-    view: function(ctrl) {
-        return m("h1", ctrl.greeting)
-    }
-};
+	$scope.logout = function (e) {
+		console.log("logout?");
+		//e.preventDefault();
+		accountService.logout();
+		//$scope.$apply();
+	};
+}]);
 
-m.route.mode = "hash";
+app.config(["$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {
+	$urlRouterProvider.otherwise("/"); 
 
-/*
-m.route(document.body, "/", {
-    "/": home,
-    "/login": login,
-    "/sponser": sponser,
-    "/user": user
-});
-*/
+    $stateProvider
+        .state('home', {
+            url: '/',
+            templateUrl: 'home.html'
+        })
+        
+        .state('login', {
+            url: '/login',
+            templateUrl: "login.html",
+            controller: "loginController"
+        })
 
-var submit = document.getElementById("submit");
-var advertiser = document.getElementById("advertiser");
-var email = document.getElementById("email");
-
-
-
-submit.onclick = function ()
-{
-
-    request.get('/api/ads')
-        .end(function(err, res) {
-            var ads = res.body;
-            getAllStats(ads);
+        .state('ads', {
+            url: '/ads',
+            templateUrl: 'ads.html',
+            controller: "adsController"
         });
-    //var user = {email: email.value, sponser: advertiser.checked};
-    //var post = client.request("POST", "/api/users", JSON.stringify(user));
-};
 
-function getAllStats (ads)
-{
-    ads.forEach(ad => {
-        request.get('/api/prints')
-            .query({ad:ad.id})
-            .end(function(err, res) {
-                if (!err) {
-                    res.body.forEach(x => {
-                        console.log(x);  
-                    });
-                }
-            });
-    }); 
-}
+}]);

@@ -1,0 +1,12 @@
+<div>
+    <input ng-model="ad.name" type="text"/>
+    <input ng-model="ad.path" type="text"/>
+    <input ng-click="submit()" type="button" value="submit"/>
+</div>
+<div>
+<ul> 
+    <li ng-repeat="a in ads track by a.id">
+    {{a.id}} {{a.name}} {{a.path}} 
+    </li>    
+</ul>
+</div>

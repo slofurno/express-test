@@ -19,7 +19,7 @@ app.use(function readBody (req, res, next) {
         next();
     });
 });
-
+/*
 app.get('/', function(req, res) {  
 	res.render('layout', {page: 'index'}); 
 });
@@ -35,6 +35,7 @@ app.get('/login', function(req, res) {
 app.get('/reset', function(req, res) {  
 	res.render('layout', {page: 'reset'}); 
 });
+*/
 
 app.use('/api', apiHandler);
 app.use('/account', accountHandler);
