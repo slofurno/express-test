@@ -1,2 +1,2 @@
 #!/bin/sh
-webpack --progress --colors --watch
+webpack -p --progress --colors --watch
