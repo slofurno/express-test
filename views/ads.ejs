@@ -1,0 +1,49 @@
+<div>
+    <input id="name" type="text"/>
+    <input id="path" type="text"/>
+    <input id="submit" type="button" value="submit"/>
+</div>
+
+<script src="/utils.js"></script>
+<script>
+    request({
+        url: "/api/ads",
+        method: "GET"
+    })
+    .then(res => {
+        var ads = JSON.parse(res);
+        console.log(ads);
+    })
+    .catch(err => {
+        console.error(err);
+    });
+
+
+    document.getElementById("submit").onclick = function () {
+    
+    var name = document.getElementById("name").value;
+    var path = document.getElementById("path").value;
+
+    var ad = {
+        name,
+        path
+    };
+
+    var options = {
+        url: "/api/ads",
+        method: "POST",
+        body: JSON.stringify(ad)
+    };
+
+    request(options)
+    .then(res => {
+        console.log(res);
+    })
+    .catch(err => {
+        console.error(err);
+    });
+
+};
+
+</script>
+

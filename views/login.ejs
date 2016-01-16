@@ -1,0 +1,80 @@
+<div id="content" style="width:360px; 
+        margin:0 auto; 
+        padding: 20px;
+        background-color:gainsboro">
+
+    <input id="email" type="text" name="email" placeholder="email"/>
+    <input id="password" type="text" name="password" placeholder="password"/>
+    <input id="create" type="button" value="create account"/>
+    <input id="login" type="button" value="login"/>
+    <a id="forgot" href="#">generate password reset link</a><br>
+
+</div>
+
+<script src="/utils.js"></script>
+<script>
+
+function saveLogin (account)
+{
+    console.log("SUCCESS created account:", account);
+    localStorage.setItem("account", account);
+}
+
+document.getElementById("forgot").onclick = function(e) {
+    e.preventDefault();
+
+	var email = document.getElementById("email").value;	
+	var password = document.getElementById("password").value;	
+
+	var body = {
+        email,
+        password
+	};
+
+    request({method:"POST", url:"/account/forgot", body:JSON.stringify(body)})
+        .then(q => {
+            var el = document.createElement("a");    
+            var link = "/forgot.html?"+q;
+            
+            el.href = link;
+            el.innerHTML = link;
+            el.style.whiteSpace = "nowrap";
+            el.style.display = "block";
+            content.appendChild(el);
+        });
+
+};
+
+document.getElementById("login").onclick = function(e) {
+	var email = document.getElementById("email").value;	
+	var password = document.getElementById("password").value;	
+
+	var body = {
+        email,
+        password
+	};
+
+	request({method:"POST", url:"/account/login", body:JSON.stringify(body)})
+        .then(saveLogin)
+        .catch(err => {
+            console.error(err);
+        });
+};
+
+document.getElementById("create").onclick = function(e) {
+	var email = document.getElementById("email").value;	
+	var password = document.getElementById("password").value;	
+	var content = document.getElementById("content");	
+
+	var body = {
+        email,
+        password
+	};
+
+	request({method:"POST", url:"/account/signup", body:JSON.stringify(body)})
+        .then(saveLogin)
+		.catch(console.error);
+
+};
+
+</script>
