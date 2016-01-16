@@ -43,6 +43,15 @@ router.use(function authUsers(req, res, next) {
         .catch(next);
 });
 
+router.get('/account', (req, res, next) => {
+    var auth = req.auth;
+    return db.getLogins(auth)
+        .then(logins => {
+            return res.json(logins);
+        })
+        .catch(next);
+});
+
 router.get('/prints', (req, res) => {
     console.log(req.query);
     var id = req.query.ad;

@@ -3,24 +3,34 @@
     <input id="path" type="text"/>
     <input id="submit" type="button" value="submit"/>
 </div>
+<div>
+<ul id="ads">
 
-<script src="/utils.js"></script>
+</ul>
+</div>
+
 <script>
-    request({
-        url: "/api/ads",
-        method: "GET"
-    })
-    .then(res => {
-        var ads = JSON.parse(res);
-        console.log(ads);
-    })
-    .catch(err => {
-        console.error(err);
-    });
+request({
+    url: "/api/ads",
+    method: "GET"
+})
+.then(res => {
+    var ads = JSON.parse(res);
+    ads.forEach(renderAd);
+})
+.catch(err => {
+    console.error(err);
+});
 
+function renderAd (ad)
+{
+    var el = document.createElement("li");
+    el.innerHTML = `id: ${ad.id}, name: ${ad.name}, path: ${ad.path}`;
+    document.getElementById("ads").appendChild(el);
+}
 
-    document.getElementById("submit").onclick = function () {
-    
+document.getElementById("submit").onclick = function () {
+
     var name = document.getElementById("name").value;
     var path = document.getElementById("path").value;
 

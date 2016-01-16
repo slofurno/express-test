@@ -7,6 +7,23 @@ var uuid = require('node-uuid');
 var db = new sqlite3.Database("test.db");
 var stats = new sqlite3.Database("stats.db");
 
+db.exec(`
+        PRAGMA synchronous = OFF; 
+        PRAGMA journal_mode = MEMORY; 
+        PRAGMA page_size=4096; 
+        PRAGMA mmap_size=4294967296; 
+        PRAGMA temp_store=MEMORY;
+        `);
+
+
+stats.exec(`
+        PRAGMA synchronous = OFF; 
+        PRAGMA journal_mode = MEMORY; 
+        PRAGMA page_size=4096; 
+        PRAGMA mmap_size=4294967296; 
+        PRAGMA temp_store=MEMORY;
+        `);
+
 function createUUID ()
 {
     return uuid.v4();
@@ -100,7 +117,6 @@ function createLogin (account)
 
 function checkLogin (login)
 {
-
     return new Promise((resolve, reject) => {
         db.get(`select * from logins
                 where logins.AccountId=$account
@@ -117,6 +133,24 @@ function checkLogin (login)
                     }
                 });
     });
+}
+
+function getLogins (account)
+{
+    return new Promise((resolve, reject) => {
+        db.all(`select * from logins
+                where logins.AccountId=$id`, {
+                    $id:account.AccountId
+                },
+                (err, row) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(row);
+                    }
+                });
+    });
+
 }
 
 function getAccount (email)
@@ -366,5 +400,6 @@ module.exports = {
     getAccount,
     updateAccount,
     createLogin,
-    checkLogin
+    checkLogin,
+    getLogins
 };

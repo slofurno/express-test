@@ -11,13 +11,33 @@
 
 </div>
 
-<script src="/utils.js"></script>
+<ul id="logins">
+
+</ul>
+
 <script>
 
 function saveLogin (account)
 {
     console.log("SUCCESS created account:", account);
     localStorage.setItem("account", account);
+}
+
+function addLoginHistory (login)
+{
+    var el = document.createElement('li');
+    el.innerHTML = `id: ${login.AccountId} token: ${login.token} address: ${login.address}`;
+    document.getElementById("logins").appendChild(el); 
+}
+
+function getLogins ()
+{
+    return request({method:"GET", url:"/api/account"})
+    .then(res => {
+        var logins = JSON.parse(res);
+        logins.forEach(addLoginHistory);
+    })
+    .catch(err => { console.error(err); });
 }
 
 document.getElementById("forgot").onclick = function(e) {
@@ -34,7 +54,7 @@ document.getElementById("forgot").onclick = function(e) {
     request({method:"POST", url:"/account/forgot", body:JSON.stringify(body)})
         .then(q => {
             var el = document.createElement("a");    
-            var link = "/forgot.html?"+q;
+            var link = "/reset?"+q;
             
             el.href = link;
             el.innerHTML = link;
@@ -56,6 +76,7 @@ document.getElementById("login").onclick = function(e) {
 
 	request({method:"POST", url:"/account/login", body:JSON.stringify(body)})
         .then(saveLogin)
+        .then(getLogins)
         .catch(err => {
             console.error(err);
         });
