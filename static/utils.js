@@ -43,7 +43,7 @@ function request (options)
 
         if (loggedin) {
             var account = JSON.parse(loggedin);
-            var u = account.account + "." + account.token;
+            var u = account.id + "." + account.token;
             client.setRequestHeader("Authorization", u);
         }
 

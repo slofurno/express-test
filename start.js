@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var secret = "E09TIFZp38XvuZR8V0bkUQyTITTX4DWuQMGuRnPaG9Q=";
 var _secret = "poiugvfbwery9348b7590bc1024c5612rn347rb2sdhczxh912c4bcvmxcvjksrhjo230";
 
-var apiHandler = require('./api');
+var apiHandler = require('./apiHandler');
 var accountHandler = require('./accountHandler');
 var app = express();
 
