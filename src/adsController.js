@@ -1,34 +1,29 @@
-function adsController ($scope, accountService)
+function adsController ($scope, authService)
 {
+    $scope.auth = authService;
     $scope.ads = [];
     $scope.ad = {};
     console.log("running ads controller");
 
-    accountService.getAds()
+    authService.getAds()
     .then(res => {
-        var ads = JSON.parse(res);
+        var ads = res.data;
         $scope.ads.push(...ads);
-        $scope.$apply();
-        console.log("ads", $scope.ads);
     })
     .catch(err => {
         console.error(err);
     });
 
     $scope.submit = function() {
-        return accountService.postAd($scope.ad)
-           .then(x => {
-                console.log(x);
-                var ad = JSON.parse(x);
+        return authService.postAd($scope.ad)
+           .then(res => {
+                var ad = res.data; 
                 $scope.ads.push(ad);
                 $scope.ad = {};
-                $scope.$apply();
            }).catch(err => {
                 console.error(err);
            }); 
     };
-
-
 }
 
 module.exports = adsController;

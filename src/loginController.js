@@ -21,9 +21,6 @@ function loginController ($scope, accountService)
     
     $scope.login = function() {
         accountService.login($scope.account)
-			.then(() => {
-				$scope.$apply();
-			});
     };
 }
 

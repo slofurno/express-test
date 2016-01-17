@@ -7,22 +7,16 @@ var adsController = require('./adsController');
 
 var app = angular.module('app', [uiRouter]);
 
-app.factory("httpService", httpService);
-app.factory("accountService", ["httpService", accountService]);
+app.factory("httpService", [httpService]);
+app.factory("accountService", ["$http", accountService]);
 
 app.controller("loginController", ["$scope", "accountService", loginController]);
 
 app.controller("adsController", ["$scope", "accountService", adsController]);
 
-app.controller("menuController", ["$scope", "accountService", function($scope, accountService) {
-	$scope.account = accountService.account;	
+app.controller("menuController", ["$scope", "accountService", function($scope, authService) {
+	$scope.auth = authService;	
 
-	$scope.logout = function (e) {
-		console.log("logout?");
-		//e.preventDefault();
-		accountService.logout();
-		//$scope.$apply();
-	};
 }]);
 
 app.config(["$stateProvider", "$urlRouterProvider", function($stateProvider, $urlRouterProvider) {

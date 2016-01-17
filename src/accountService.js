@@ -1,73 +1,73 @@
-function accountService (httpService)
+function authService ($http)
 {
+    var auth = {
+        login, 
+		logout,
+        getAds,
+        postAd
+    };
+
 	console.log("running account service");
     var loggedin = localStorage.getItem("account");
-    var account = {};
 
     if (loggedin) {
-        account = JSON.parse(loggedin);
-
-        //account.id = p.id;
-        //account.token = p.token;
+        auth.account = JSON.parse(loggedin);
+        console.log("logged in as", auth.account);
     }
 
-	console.log("logged in as", account);
-
-    var authedRequest = function (options) {
-        if (account.id && account.token) {
-            var u = account.id + "." + account.token;
+    function authedRequest (options) 
+	{
+        if (auth.account) {
+            if (!auth.account.id || !auth.account.token) {
+                throw new Error("id and token should not be undefined if account");
+            }
+            var u = auth.account.id + "." + auth.account.token;
             options.headers = {
                 Authorization: u 
             };
         }
-        return httpService.request(options);
-    };
+        return $http(options);
+    }
 
-    var login = function (login) {
-        var body = JSON.stringify(login);
-        return httpService.request({method:"POST", url:"/account/login",body:body})
-            .then(a => {
-                var acc = JSON.parse(a);
+    function login (login) 
+    {
+        return $http({method:"POST", url:"/account/login", data:login})
+            .then(res => {
+                var acc = res.data;
 				acc.email = login.email;
 
-				account.id = acc.id;
-				account.token = acc.token;
-				account.email = acc.email;
+                auth.account = acc;
                 localStorage.setItem("account", JSON.stringify(acc));
+                console.log("logged in as", auth.account);
                 return acc;
             });
-    };
+    }
 
-    var getAds = function () {
+    function getAds () 
+    {
         return authedRequest({
             url: "/api/ads",
             method: "GET"
         });
-    };
+    }
 
-    var postAd = function (ad) {
+    function postAd (ad) 
+    {
         return authedRequest({
             url: "/api/ads",
             method: "POST",
-            body: JSON.stringify(ad)
+            data: ad
         });
-    };
-
-	var logout = function() {
-		localStorage.removeItem("account");
-		account.id = undefined;
-		account.token = undefined;
-		account.email = undefined;
-	};
-
-    return {
-        login, 
-		logout,
-        account, 
-        getAds,
-        postAd
     }
+
+	function logout () 
+    {
+		localStorage.removeItem("account");
+        delete auth.account;
+	}
+
+    return auth;
 }
 
-module.exports = accountService;
+module.exports = authService;
 
