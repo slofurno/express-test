@@ -1,5 +1,5 @@
 
-function loginController ($scope, accountService)
+function loginController ($scope, $state, accountService)
 {
     $scope.account = {};
 
@@ -12,15 +12,18 @@ function loginController ($scope, accountService)
     $scope.getLogins = function() {
 
         return request({method:"GET", url:"/api/account"})
-        .then(res => {
-            var logins = JSON.parse(res);
-            logins.forEach(addLoginHistory);
-        })
-        .catch(err => { console.error(err); });
+            .then(res => {
+                var logins = JSON.parse(res);
+                logins.forEach(addLoginHistory);
+            })
+            .catch(err => { console.error(err); });
     };
     
     $scope.login = function() {
         accountService.login($scope.account)
+            .then(ok => {
+                $state.go("home");
+            });
     };
 }
 

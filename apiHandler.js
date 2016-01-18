@@ -45,9 +45,20 @@ router.use(function authUsers(req, res, next) {
 
 router.get('/account', (req, res, next) => {
     var auth = req.auth;
-    return db.getLogins(auth)
+    db.getLogins(auth)
         .then(logins => {
-            return res.json(logins);
+            res.json(logins);
+        })
+        .catch(next);
+});
+
+router.get('/account/profile', (req, res, next) => {
+    var auth = req.auth;
+
+    db.getProfile(auth)
+        .then(profile => {
+            console.log(profile);
+            res.json(profile);
         })
         .catch(next);
 });

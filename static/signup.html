@@ -1,0 +1,39 @@
+<div id="content" style="width:360px; 
+        margin:0 auto; 
+        padding: 20px;
+        background-color:gainsboro"
+                  ng-switch="vm.role">
+    <p>sign up</p>
+
+    <input type="button" ng-click="vm.beUser()" value="signup as user"/>
+
+    <input type="button" ng-click="vm.beSponsor()" value="signup as sponsor"/>
+    <br>
+    <br>
+
+    <div ng-switch-when="user">
+
+    <input ng-model="vm.name" type="text" placeholder="name"/>
+
+    <input ng-model="vm.school" type="text" placeholder="school"/>
+    </div>
+    <div ng-switch-when="sponsor">
+    <input ng-model="vm.name" type="text" placeholder="name"/>
+    <input ng-model="vm.company" type="text" placeholder="company name"/>
+    
+    </div>
+
+    <br>
+
+    <input ng-model="vm.email" type="text" placeholder="email"/>
+    <input ng-model="vm.password" ype="text" placeholder="password"/>
+    <br>
+    <br>
+    
+    <input ng-click="vm.signup()" type="button" value="signup"/>
+    <br>
+    <br>
+    <a ui-sref="login" style="float:right">login</a>
+
+</div>
+

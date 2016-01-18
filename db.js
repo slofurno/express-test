@@ -78,10 +78,13 @@ function createAccount (account)
     var password = hash(account.password + salt);
     var email = account.email;
     var address = account.address;
+    var role = account.role;
+
+    console.log("insert account", id, email, password, salt, role);
 
     return new Promise((resolve, reject) => {
-        db.run("insert into accounts values (?,?,?,?)", [
-                id, email, password, salt
+        db.run("insert into accounts values (?,?,?,?,?)", [
+                id, email, password, salt, role
         ], err => {
             if (err) {
                 reject(err);
@@ -89,7 +92,8 @@ function createAccount (account)
                 resolve({
                     id,
                     email,
-                    address
+                    address,
+                    role
                 });
             }
         });
@@ -101,6 +105,10 @@ function createLogin (account)
     var token = createUUID();
     var id = account.id;
     var address = account.address;
+    var role = account.role;
+    var email = account.email;
+
+    console.log("creating login:", id, address, role, email);
 
     return new Promise((resolve, reject) => {
         db.run("insert into logins values (?,?,?)", [
@@ -109,7 +117,7 @@ function createLogin (account)
             if (err) {
                 reject(err);
             } else {
-                resolve({id, token});
+                resolve({id, token, email, role});
             }
         });
     });
@@ -151,6 +159,36 @@ function getLogins (account)
                 });
     });
 
+}
+
+function createProfile (profile)
+{
+    return new Promise((resolve, reject) => {
+        db.run("insert into profiles values (?,?)", [
+                profile.AccountId, profile.json
+        ], err => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(profile);
+            }
+        });
+    });
+} 
+
+function getProfile (auth)
+{
+    return new Promise((resolve, reject) => {
+        db.get(`select * from profiles 
+                where profiles.AccountId=$id`, {$id:auth.AccountId},
+                (err, row) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(row);
+                    }
+                });
+    });
 }
 
 function getAccount (email)
@@ -401,5 +439,7 @@ module.exports = {
     updateAccount,
     createLogin,
     checkLogin,
-    getLogins
+    getLogins,
+    createProfile,
+    getProfile
 };

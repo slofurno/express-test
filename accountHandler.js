@@ -35,15 +35,22 @@ function passwordReset (email)
 }
 
 router.post('/signup', (req, res, next) => {
-    console.log(req.body);
     var account = JSON.parse(req.body);
     account.address = req.ip;
 
-    return db.createAccount(account)
+    console.log("signup as:", account);
+
+    db.createAccount(account)
         .then(db.createLogin)
         .then(login => {
-            return res.json(login);
+            res.json(login);
+            var profile = {
+                AccountId: login.id,
+                json: JSON.stringify(account.profile)
+            };
+            return profile;
         })
+        .then(db.createProfile)
         .catch(next);
 });
 
@@ -61,7 +68,8 @@ router.post('/login', (req, res, next) => {
             return {
                 id: account.id,
                 email: account.email,
-                address: req.ip
+                address: req.ip,
+                role: account.role
             };
         } else {
             return Promise.reject("login failed");

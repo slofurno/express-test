@@ -4,7 +4,9 @@ function authService ($http)
         login, 
 		logout,
         getAds,
-        postAd
+        postAd,
+        createAccount,
+        getProfile
     };
 
 	console.log("running account service");
@@ -29,16 +31,20 @@ function authService ($http)
         return $http(options);
     }
 
+    function loginAs (account)
+    {
+        auth.account = account;
+        localStorage.setItem("account", JSON.stringify(account));
+        console.log("logged in as", account);
+    }
+
     function login (login) 
     {
         return $http({method:"POST", url:"/account/login", data:login})
             .then(res => {
                 var acc = res.data;
 				acc.email = login.email;
-
-                auth.account = acc;
-                localStorage.setItem("account", JSON.stringify(acc));
-                console.log("logged in as", auth.account);
+                loginAs(acc);
                 return acc;
             });
     }
@@ -57,6 +63,28 @@ function authService ($http)
             url: "/api/ads",
             method: "POST",
             data: ad
+        });
+    }
+
+    function createAccount (acc)
+    {
+        return $http({
+            url: "/account/signup",
+            method: "POST",
+            data: acc
+        })
+        .then(res => {
+            var account = res.data;
+            loginAs(account);
+            return account;
+        });
+    }
+
+    function getProfile ()
+    {
+        return authedRequest({
+            url: "/api/account/profile",
+            method: "GET"
         });
     }
 

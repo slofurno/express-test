@@ -48,17 +48,21 @@
 
 	var angular = __webpack_require__(1);
 	var uiRouter = __webpack_require__(3);
-	var loginController = __webpack_require__(4);
+
 	var accountService = __webpack_require__(5);
 	var httpService = __webpack_require__(6);
+
+	var loginController = __webpack_require__(4);
 	var adsController = __webpack_require__(7);
+	var signupController = __webpack_require__(8);
+	var usersController = __webpack_require__(9);
 
 	var app = angular.module('app', [uiRouter]);
 
 	app.factory("httpService", [httpService]);
 	app.factory("accountService", ["$http", accountService]);
 
-	app.controller("loginController", ["$scope", "accountService", loginController]);
+	app.controller("loginController", ["$scope", "$state", "accountService", loginController]);
 
 	app.controller("adsController", ["$scope", "accountService", adsController]);
 
@@ -66,19 +70,55 @@
 	    $scope.auth = authService;
 	}]);
 
+	app.controller("usersController", ["accountService", usersController]);
+	app.controller("signupController", ["$state", "accountService", signupController]);
+	app.controller("homeController", ["$scope", "$state", "accountService", homeController]);
+	app.controller("profileController", ["accountService", function (authService) {
+	    var vm = this;
+	    console.log("getting profile");
+	    authService.getProfile().then(function (res) {
+	        console.log(res);
+	    });
+	}]);
+
+	function homeController($scope, $state, authService) {
+
+	    if (!authService.account) {} else if (authService.account.role === "user") {
+	        $state.go("users");
+	    } else {
+	        $state.go("sponsors");
+	    }
+	}
+
 	app.config(["$stateProvider", "$urlRouterProvider", function ($stateProvider, $urlRouterProvider) {
 	    $urlRouterProvider.otherwise("/");
 
 	    $stateProvider.state('home', {
 	        url: '/',
-	        templateUrl: 'home.html'
+	        templateUrl: 'home.html',
+	        controller: 'homeController'
+	    }).state('signup', {
+	        url: '/signup',
+	        templateUrl: 'signup.html',
+	        controller: 'signupController',
+	        controllerAs: 'vm'
 	    }).state('login', {
 	        url: '/login',
 	        templateUrl: "login.html",
 	        controller: "loginController"
-	    }).state('ads', {
-	        url: '/ads',
-	        templateUrl: 'ads.html',
+	    }).state('profile', {
+	        url: '/profile',
+	        templateUrl: "profile.html",
+	        controller: "profileController",
+	        controllerAs: "vm"
+	    }).state('users', {
+	        url: '/users',
+	        templateUrl: 'users.html',
+	        controller: "usersController",
+	        controllerAs: "vm"
+	    }).state('sponsors', {
+	        url: '/sponsors',
+	        templateUrl: 'sponsors.html',
 	        controller: "adsController"
 	    });
 	}]);
@@ -4773,7 +4813,7 @@
 
 	"use strict";
 
-	function loginController($scope, accountService) {
+	function loginController($scope, $state, accountService) {
 	    $scope.account = {};
 
 	    function saveLogin(account) {
@@ -4792,7 +4832,9 @@
 	    };
 
 	    $scope.login = function () {
-	        accountService.login($scope.account);
+	        accountService.login($scope.account).then(function (ok) {
+	            $state.go("home");
+	        });
 	    };
 	}
 
@@ -4870,7 +4912,9 @@
 	        login: login,
 	        logout: logout,
 	        getAds: getAds,
-	        postAd: postAd
+	        postAd: postAd,
+	        createAccount: createAccount,
+	        getProfile: getProfile
 	    };
 
 	    console.log("running account service");
@@ -4894,14 +4938,17 @@
 	        return $http(options);
 	    }
 
+	    function loginAs(account) {
+	        auth.account = account;
+	        localStorage.setItem("account", JSON.stringify(account));
+	        console.log("logged in as", account);
+	    }
+
 	    function login(login) {
 	        return $http({ method: "POST", url: "/account/login", data: login }).then(function (res) {
 	            var acc = res.data;
 	            acc.email = login.email;
-
-	            auth.account = acc;
-	            localStorage.setItem("account", JSON.stringify(acc));
-	            console.log("logged in as", auth.account);
+	            loginAs(acc);
 	            return acc;
 	        });
 	    }
@@ -4918,6 +4965,25 @@
 	            url: "/api/ads",
 	            method: "POST",
 	            data: ad
+	        });
+	    }
+
+	    function createAccount(acc) {
+	        return $http({
+	            url: "/account/signup",
+	            method: "POST",
+	            data: acc
+	        }).then(function (res) {
+	            var account = res.data;
+	            loginAs(account);
+	            return account;
+	        });
+	    }
+
+	    function getProfile() {
+	        return authedRequest({
+	            url: "/api/account/profile",
+	            method: "GET"
 	        });
 	    }
 
@@ -5009,6 +5075,82 @@
 	}
 
 	module.exports = adsController;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function signupController($state, authService) {
+	    var vm = this;
+	    var roles = {};
+	    roles.USER = 1 << 1;
+	    roles.SPONSOR = 1 << 2;
+	    vm.roles = roles;
+
+	    vm.role = "user";
+	    vm.email = "";
+	    vm.password = "";
+	    vm.name = "";
+
+	    vm.signup = signup;
+	    vm.beUser = beUser;
+	    vm.beSponsor = beSponsor;
+
+	    function beUser() {
+	        vm.role = "user";
+	        console.log(vm.role);
+	    }
+
+	    function beSponsor() {
+	        vm.role = "sponsor";
+	        console.log(vm.role);
+	    }
+
+	    function redirectHome() {
+	        $state.go("home");
+	    }
+
+	    function signup() {
+	        var account = {
+	            email: vm.email,
+	            password: vm.password,
+	            role: vm.role
+	        };
+
+	        if (vm.role === "user") {
+	            account.profile = {
+	                name: vm.name,
+	                school: vm.school
+	            };
+	        } else {
+	            account.profile = {
+	                name: vm.name,
+	                company: vm.company
+	            };
+	        }
+
+	        authService.createAccount(account).then(redirectHome).catch(function (err) {
+	            console.log(err);
+	        });
+	    }
+	}
+
+	module.exports = signupController;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function usersController(authService) {
+	    var vm = this;
+	    vm.auth = authService;
+	}
+
+	module.exports = usersController;
 
 /***/ }
 /******/ ]);
